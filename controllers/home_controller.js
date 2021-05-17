@@ -1,7 +1,4 @@
 module.exports.home = function(req,res){
-    return res.end('<h1>EXPRESS is up for codeial');
+    return res.end('<h1>EXPRESS is up for codeial</h1>');
 }
 
-module.exports.fun = function(req,res){
-    return res.end("<h1>FUNNNN</h1>");
-}
