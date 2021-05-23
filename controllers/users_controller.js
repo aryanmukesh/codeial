@@ -1,9 +1,23 @@
 const User = require("../models/users");
 
 module.exports.profile = function(req,res){
-    return res.render('users', {
-        title: "Users"
-    });
+    if(req.cookies.user_id){
+        User.findById(req.cookies.user_id,function(err,user){
+            if(err){console.log('err in loading profile page!'); return;}
+            if(user){
+                //user id matches to one of the users
+                return res.render('user_profile',{
+                    title:"User Profile",
+                    user: user
+                });
+            }else{
+                return res.redirect('/users/login');
+            }
+        });
+    }else{
+        return res.redirect('/users/login');
+    }
+    
 }
 //Render the Sign-Up page
 module.exports.signUp = function(req,res){
@@ -26,8 +40,7 @@ module.exports.create = function(req,res){
         return res.redirect('back');
     }
     User.findOne({email: req.body.email}, function(err,user){
-        if(err){
-            console.log('error in finding user in sign up!'); return;}
+        if(err){ console.log('error in finding user in sign up!'); return;}
         if(!user){
             User.create(req.body, function(err,user){
                 if(err){
@@ -45,5 +58,26 @@ module.exports.create = function(req,res){
 
 //sign in to create a session for the user
 module.exports.createSession = function(req,res){
-    //to-do later
+    //steps to authenticate
+    //find user
+    User.findOne({email:req.body.email}, function(err,user){
+        if(err){ console.log('error in finding user in sign in!'); return;}
+        if(user){
+            //handle user pw didn't match
+            if(user.pw!=req.body.pw)
+            {   
+                console.log("PW didn't match");
+                return res.redirect('back');
+            }
+            //handle session creation
+            res.cookie('user_id',user.id);
+            return res.redirect('/users/profile');
+        }
+        else{
+            //handle user not found
+            console.log("user not found!!");
+            return res.redirect('back');
+        }
+
+    })
 }
